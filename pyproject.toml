@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "zoho-scripts"
+version = "0.1.0"
+description = "Zoho Books management scripts for item and invoice operations"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{ include = "zoho" }]
+
+[tool.poetry.scripts]
+zoho = "zoho.__main__:cli"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+click = "^8.2.1"
+requests = "^2.32.5"
+python-dotenv = "^1.1.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+flake8 = "^7.3.0"
+ipdb = "^0.13.13"
+isort = "^6.0.1"
+mypy = "^1.17.1"
+pytest = "^8.4.2"
+types-requests = "^2.32.4.20250809"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 119
+target-version = ['py38']
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 119
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
