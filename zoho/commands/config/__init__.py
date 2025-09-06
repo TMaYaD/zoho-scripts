@@ -1,11 +1,13 @@
 """
-Invoices commands for Zoho Books CLI
+Configuration commands for Zoho Books CLI
 """
 
 import click
 
 
 from .org import org
+from .setup import setup
+
 
 @click.group()
 def config():
@@ -13,5 +15,6 @@ def config():
     pass
 
 
-# Add invoice commands to the group
+# Add config commands to the group
 config.add_command(org)
+config.add_command(setup)

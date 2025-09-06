@@ -2,6 +2,7 @@ import requests
 
 from .settings import settings
 
+
 class Client:
     """Base Zoho Books API client with authentication and common operations"""
 
@@ -22,16 +23,16 @@ class Client:
             }
 
     def _get_access_token(self):
-        """Get access token using refresh token"""
-        url = f"{settings.ACCOUNTS_BASE_URL}/token"
-        params = {
-            "refresh_token": settings.refresh_token,
-            "client_id": settings.client_id,
-            "client_secret": settings.client_secret,
-            "grant_type": "refresh_token",
-        }
-        response = requests.post(url, params=params)
-        return response.json()["access_token"]
+        """Get access token using Self Client credentials flow"""
+        if not settings.client_id or not settings.client_secret:
+            raise ValueError("Client ID and Client Secret are required for Self Client flow")
+
+        token_data = self.get_self_client_access_token(
+            settings.client_id,
+            settings.client_secret,
+            soid=f"ZohoBooks.{settings.org_id}" if settings.org_id else None,
+        )
+        return token_data["access_token"]
 
     def _make_request(self, method, endpoint, params=None, json_data=None):
         """Make API request with error handling"""
@@ -40,7 +41,7 @@ class Client:
         params = params or {}
         params["organization_id"] = settings.org_id
 
-        response = requests.request(method, url, params=params, json=json_data, headers=self.headers)
+        response = requests.request(method, url, params=params, json=json_data, headers=self.headers, timeout=30)
         response_json = response.json()
 
         if response_json.get("code", 0) != 0:
@@ -80,5 +81,33 @@ class Client:
     def delete(self, endpoint, params=None):
         """Make DELETE request"""
         return self._make_request("DELETE", endpoint, params=params)
+
+    def get_self_client_access_token(self, client_id, client_secret, scope="ZohoBooks.fullaccess.all", soid=None):
+        """Get access token using Self Client credentials flow"""
+        url = "https://accounts.zoho.com/oauth/v2/token"
+        params = {
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "grant_type": "client_credentials",
+            "scope": scope,
+        }
+
+        # Add soid parameter if provided (required for certain Zoho apps)
+        if soid:
+            params["soid"] = soid
+
+        response = requests.post(url, params=params, timeout=30)
+
+        if response.status_code == 200:
+            token_data = response.json()
+            return {
+                "access_token": token_data.get("access_token"),
+                "api_domain": token_data.get("api_domain"),
+                "token_type": token_data.get("token_type"),
+                "expires_in": token_data.get("expires_in"),
+            }
+        else:
+            raise ValueError(f"Failed to get access token: {response.text}")
+
 
 client = Client()

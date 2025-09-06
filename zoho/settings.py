@@ -1,8 +1,6 @@
-
-class Settings():
+class Settings:
     client_id: str
     client_secret: str
-    refresh_token: str
     org_id: str
 
     ACCOUNTS_BASE_URL: str = "https://accounts.zoho.com"
@@ -10,22 +8,21 @@ class Settings():
 
     ENV_FILE: str = ".env"
 
-    def __init__(self, client_id, client_secret, refresh_token, org_id):
+    def __init__(self, client_id, client_secret, org_id=None):
         self.client_id = client_id
         self.client_secret = client_secret
-        self.refresh_token = refresh_token
         self.org_id = org_id
         self.ACCOUNTS_BASE_URL = "https://accounts.zoho.com/oauth/v2"
         self.BOOKS_BASE_URL = "https://www.zohoapis.com/books/v3"
 
     def save(self):
-        with open(self.ENV_FILE, "w") as f:
-            f.write(f"ZOHO_CLIENT_ID=\"{self.client_id}\"\n")
-            f.write(f"ZOHO_CLIENT_SECRET=\"{self.client_secret}\"\n")
-            f.write(f"ZOHO_REFRESH_TOKEN=\"{self.refresh_token}\"\n")
-            f.write(f"ZOHO_ORG_ID=\"{self.org_id}\"\n")
+        with open(self.ENV_FILE, "w", encoding="utf-8") as f:
+            if self.client_id:
+                f.write(f'ZOHO_CLIENT_ID="{self.client_id}"\n')
+            if self.client_secret:
+                f.write(f'ZOHO_CLIENT_SECRET="{self.client_secret}"\n')
+            if self.org_id:
+                f.write(f'ZOHO_ORG_ID="{self.org_id}"\n')
 
 
-
-
-settings = Settings(None, None, None, None)
+settings = Settings(None, None)
